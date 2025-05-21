@@ -16,6 +16,6 @@ void bacamundur();
 int listkosong();
 
 int main() {
-    
+    cout << "tes kolaborasi";
     return 0;
 }

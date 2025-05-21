@@ -16,5 +16,6 @@ int listkosong();
 
 int main() {
     cout << "tes kolaborasi";
+    cout << "tes kolaborasi 2";
     return 0;
 }

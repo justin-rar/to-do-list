@@ -5,7 +5,6 @@ struct node {
     string info;
     node *kanan, *kiri;
 };
-
 node *awal, *akhir, *bantu, *hapus, *NB;
 
 void buatlistbaru();

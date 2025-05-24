@@ -149,8 +149,19 @@ void ubahStatus(char nama[50])
     }
 
     cout << "Status sekarang: " << bantu->status << "\n";
-    cout << "Masukkan status baru (Belum / Proses / Selesai): ";
-    cin.getline(bantu->status, 50);
+
+    while (true)
+    {
+        cout << "Masukkan status baru (Belum / Proses / Selesai): ";
+        cin.getline(bantu->status, 50);
+        if (strcmp(bantu->status, "Belum") == 0 || strcmp(bantu->status, "belum") == 0 ||
+            strcmp(bantu->status, "Proses") == 0 || strcmp(bantu->status, "proses") == 0 ||
+            strcmp(bantu->status, "Selesai") == 0 || strcmp(bantu->status, "selesai") == 0)
+            break;
+        else
+            cout << "Tidak ada pilihan. Silakan masukkan hanya: Belum, Proses, atau Selesai.\n";
+    }
+
     cout << "Status diperbarui" << endl;
 }
 
@@ -179,7 +190,8 @@ void cariTugas(char caridata[50])
         bantu = bantu->kanan;
     }
 
-    if (!found){
+    if (!found)
+    {
         cout << "Tugas dengan " << caridata << " tidak ada" << endl;
     }
 }
@@ -261,8 +273,15 @@ int main()
             cin.getline(tugas, 50);
             cout << "Tanggal (YYYY-MM-DD)         : ";
             cin.getline(tanggal, 50);
-            cout << "Status (Belum/Proses/Selesai): ";
-            cin.getline(status, 50);
+            while (true)
+            {
+                cout << "Status (Belum/Proses/Selesai): ";
+                cin.getline(status, 50);
+                if (strcmp(status, "Belum") == 0 || strcmp(status, "Proses") == 0 || strcmp(status, "selesai") == 0 || strcmp(status, "belum") == 0 || strcmp(status, "proses") == 0 || strcmp(status, "selesai") == 0)
+                    break;
+                else
+                    cout << "Tidak ada pilihan. Silakan masukkan hanya: Belum, Proses, atau Selesai.\n";
+            }
             cout << "Catatan                      : ";
             cin.getline(catatan, 50);
             tambahTugas(tugas, tanggal, status, catatan);
@@ -273,10 +292,14 @@ int main()
         {
             char nama[50];
             system("cls");
+            cout << "Daftar Tugas:\n";
+            cout << "-----------------------------\n";
+            tampilTugas();
             cout << "Masukkan nama tugas yang ingin dihapus: ";
             cin.getline(nama, 50);
             hapusTugas(nama);
             simpanKeFile();
+            system("pause");
             break;
         }
         case 3:

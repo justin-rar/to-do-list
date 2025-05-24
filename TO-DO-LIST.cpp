@@ -6,14 +6,14 @@ using namespace std;
 
 struct Node
 {
-    string tugas;
-    string tanggal;
-    string status;
-    string catatan;
+    char tugas[50];
+    char tanggal[50];
+    char status[50];
+    char catatan[50];
     Node *kanan, *kiri;
 };
 
-Node *awal, *akhir, *bantu, *hapus, *NB;
+Node *awal, *akhir, *bantu, *hapus;
 const char *namaFile = "todolist.txt";
 
 int listKosong()
@@ -24,22 +24,28 @@ int listKosong()
         return 0;
 }
 
-void tambahTugas(string tugas, string tanggal, string status, string catatan)
+void tambahTugas(char tugas[50], char tanggal[50], char status[50], char catatan[50])
 {
-    Node *NB = new Node{tugas, tanggal, status, catatan, nullptr, nullptr};
+    Node *NB = new Node;
+    strcpy(NB->tugas, tugas);
+    strcpy(NB->tanggal, tanggal);
+    strcpy(NB->status, status);
+    strcpy(NB->catatan, catatan);
+    NB->kanan = nullptr;
+    NB->kiri = nullptr;
 
     if (listKosong())
     {
         awal = akhir = NB;
     }
-    else if (tanggal < awal->tanggal)
+    else if (strcmp(tanggal, awal->tanggal) < 0)
     {
         // tambah di depan
         NB->kanan = awal;
         awal->kiri = NB;
         awal = NB;
     }
-    else if (tanggal >= akhir->tanggal)
+    else if (strcmp(tanggal, akhir->tanggal) >= 0)
     {
         // tambah di belakang
         akhir->kanan = NB;
@@ -50,7 +56,7 @@ void tambahTugas(string tugas, string tanggal, string status, string catatan)
     {
         // tambah di tengah, cari posisi yang sesuai
         Node *bantu = awal;
-        while (bantu->kanan != nullptr && bantu->kanan->tanggal <= tanggal)
+        while (bantu->kanan != nullptr && strcmp(bantu->kanan->tanggal, tanggal) <= 0)
         {
             bantu = bantu->kanan;
         }
@@ -64,10 +70,16 @@ void tambahTugas(string tugas, string tanggal, string status, string catatan)
     }
 }
 
-void hapusTugas(string nama)
+void hapusTugas(char nama[50])
 {
+    if (listKosong())
+    {
+        cout << "Belum ada tugas" << endl;
+        return;
+    }
+
     Node *bantu = awal;
-    while (bantu != nullptr && bantu->tugas != nama)
+    while (bantu != nullptr && strcmp(bantu->tugas, nama) != 0)
     {
         bantu = bantu->kanan;
     }
@@ -122,10 +134,10 @@ void tampilTugas()
     }
 }
 
-void ubahStatus(string nama)
+void ubahStatus(char nama[50])
 {
     Node *bantu = awal;
-    while (bantu != nullptr && bantu->tugas != nama)
+    while (bantu != nullptr && strcmp(bantu->tugas, nama) != 0)
     {
         bantu = bantu->kanan;
     }
@@ -138,11 +150,11 @@ void ubahStatus(string nama)
 
     cout << "Status sekarang: " << bantu->status << "\n";
     cout << "Masukkan status baru (Belum / Proses / Selesai): ";
-    getline(cin, bantu->status);
+    cin.getline(bantu->status, 50);
     cout << "Status diperbarui" << endl;
 }
 
-void cariTugas(string keyword)
+void cariTugas(char caridata[50])
 {
     if (listKosong())
     {
@@ -151,25 +163,24 @@ void cariTugas(string keyword)
     }
 
     Node *bantu = awal;
-    bool ditemukan = false;
+    bool found = false;
 
     while (bantu != nullptr)
     {
-        if (bantu->tugas.find(keyword) != string::npos)
+        if (strcmp(bantu->tugas, caridata) == 0)
         {
             cout << "Nama    : " << bantu->tugas << "\n";
             cout << "Tanggal : " << bantu->tanggal << "\n";
             cout << "Status  : " << bantu->status << "\n";
             cout << "Catatan : " << bantu->catatan << "\n";
             cout << "-----------------------------\n";
-            ditemukan = true;
+            found = true;
         }
         bantu = bantu->kanan;
     }
 
-    if (!ditemukan)
-    {
-        cout << "Tugas dengan kata kunci \"" << keyword << "\" tidak ditemukan.\n";
+    if (!found){
+        cout << "Tugas dengan " << caridata << " tidak ada" << endl;
     }
 }
 
@@ -185,14 +196,9 @@ void simpanKeFile()
     Node *bantu = awal;
     while (bantu != nullptr)
     {
-        fprintf(ptr, "%s|%s|%s|%s\n",
-                bantu->tugas.c_str(),
-                bantu->tanggal.c_str(),
-                bantu->status.c_str(),
-                bantu->catatan.c_str());
+        fprintf(ptr, "%s\n%s\n%s\n%s\n", bantu->tugas, bantu->tanggal, bantu->status, bantu->catatan);
         bantu = bantu->kanan;
     }
-
     fclose(ptr);
 }
 
@@ -205,31 +211,12 @@ void bacaDariFile()
         return;
     }
 
-    char buffer[512];
-    while (fgets(buffer, sizeof(buffer), ptr))
+    char tugas[50], tanggal[50], status[50], catatan[50];
+
+    while (fscanf(ptr, "%49[^\n]\n%49[^\n]\n%49[^\n]\n%49[^\n]\n", tugas, tanggal, status, catatan) == 4)
     {
-        buffer[strcspn(buffer, "\n")] = '\0'; // Hapus newline di akhir
-        char *token = strtok(buffer, "|");
-        if (!token)
-            continue;
-
-        string tugas = token;
-        token = strtok(NULL, "|");
-        if (!token)
-            continue;
-        string tanggal = token;
-        token = strtok(NULL, "|");
-        if (!token)
-            continue;
-        string status = token;
-        token = strtok(NULL, "|");
-        if (!token)
-            continue;
-        string catatan = token;
-
         tambahTugas(tugas, tanggal, status, catatan);
     }
-
     fclose(ptr);
 }
 
@@ -268,46 +255,51 @@ int main()
         {
         case 1:
         {
-            string tugas, tanggal, status, catatan;
-            cout << "Nama Tugas     : ";
-            getline(cin, tugas);
-            cout << "Tanggal (YYYY-MM-DD): ";
-            getline(cin, tanggal);
+            system("cls");
+            char tugas[50], tanggal[50], status[50], catatan[50];
+            cout << "Nama Tugas                   : ";
+            cin.getline(tugas, 50);
+            cout << "Tanggal (YYYY-MM-DD)         : ";
+            cin.getline(tanggal, 50);
             cout << "Status (Belum/Proses/Selesai): ";
-            getline(cin, status);
-            cout << "Catatan        : ";
-            getline(cin, catatan);
+            cin.getline(status, 50);
+            cout << "Catatan                      : ";
+            cin.getline(catatan, 50);
             tambahTugas(tugas, tanggal, status, catatan);
             simpanKeFile();
             break;
         }
         case 2:
         {
-            string nama;
+            char nama[50];
+            system("cls");
             cout << "Masukkan nama tugas yang ingin dihapus: ";
-            getline(cin, nama);
+            cin.getline(nama, 50);
             hapusTugas(nama);
             simpanKeFile();
             break;
         }
         case 3:
+            system("cls");
             tampilTugas();
             system("pause");
             break;
         case 4:
         {
-            string nama;
+            char nama[50];
+            system("cls");
             cout << "Masukkan nama tugas yang ingin diubah statusnya: ";
-            getline(cin, nama);
+            cin.getline(nama, 50);
             ubahStatus(nama);
             simpanKeFile();
             break;
         }
         case 5:
         {
-            string keyword;
+            char keyword[50];
+            system("cls");
             cout << "Masukkan kata kunci untuk mencari tugas: ";
-            getline(cin, keyword);
+            cin.getline(keyword, 50);
             cariTugas(keyword);
             system("pause");
             break;
